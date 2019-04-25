@@ -1,0 +1,8 @@
+{% extends 'compose_ui/base.html' %}
+{% block content %}
+    {% if container_list %}
+        {% include 'compose_ui/snippets/projects_table.html' with container_list=container_list perms=perms only %}
+    {% else %}
+        <p>No containers are available.</p>
+    {% endif %}
+{% endblock %}

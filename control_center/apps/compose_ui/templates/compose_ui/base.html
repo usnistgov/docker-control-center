@@ -1,0 +1,62 @@
+{% load custom_tags %}
+{% block extrahead %}
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <meta name="application-name" content="Docker Compose Control Center">
+    <meta name="author" content="Center for Nanoscale Science and Technology">
+    <meta name="description"
+          content="Docker Compose Control Center is a small utility web application. It allows to control docker containers, and specifically services created with docker-compose">
+    <meta name="keywords" content="docker, compose, control, center, container, service, project">
+    {% if auto_refresh %}<meta http-equiv="refresh" content="{{ auto_refresh }}">{% endif %}
+    {# Snippet to prevent clickjacking. Taken from https://www.codemagi.com/blog/post/194 #}
+    <style id="antiClickjack">body {
+        display: none !important;
+    }</style>
+    <!--suppress JSValidateTypes -->
+    <script type="text/javascript">
+        if (self === top) {
+            var antiClickjack = document.getElementById("antiClickjack");
+            antiClickjack.parentNode.removeChild(antiClickjack);
+        } else
+            top.location = self.location;
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="{% static 'compose_ui/style.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'compose_ui/font-awesome.css' %}">
+
+    <script type="text/javascript" src="{% static "compose_ui/compose_ui.js" %}"></script>
+
+    <link rel="shortcut icon" href="{% static 'compose_ui/favicon.ico' %}">
+    <title>{{ title }}</title>
+{% endblock %}
+<div class="header">
+    <div class="header-content">
+        <div class="header-logo"><img src="{% static 'compose_ui/favicon.ico' %}" alt="logo"/></div>
+        <div class="header-title">{{ title }}</div>
+    </div>
+    <ul class="navbar">
+        {% url 'managed_containers' as managed_containers_url %}
+        {% url 'other_project_containers' as other_projects_containers_url %}
+        {% url 'standalone_containers' as standalone_containers_url %}
+        {% url 'docker_system' as docker_system_url %}
+        <li><a class="{% if request.path in managed_containers_url %}active{% endif %}" href="{{ managed_containers_url }}">Managed Project</a></li>
+        {% if perms.other_projects %}<li><a class="{% if request.path in other_projects_containers_url %}active{% endif %}" href="{{ other_projects_containers_url }}">Other Projects</a></li>{% endif %}
+        {% if perms.other_containers %}<li><a class="{% if request.path in standalone_containers_url %}active{% endif %}" href="{{ standalone_containers_url }}">Standalone Containers</a></li>{% endif %}
+        {% if perms.docker_system %}<li><a class="{% if request.path in docker_system_url %}active{% endif %}" href="{{ docker_system_url }}">Docker System</a></li>{% endif %}
+        {% if user.is_staff %}<li><a class="{% if 'admin' in request.path %}active{% endif %}" href="/admin">Administration</a></li>{% endif %}
+        <li class="right user-name" style="border-right:none"><a href="#" style="cursor: default">Welcome, {{ user.first_name }}</a></li>
+    </ul>
+</div>
+<div id="loading">
+    <div class="loading-container">
+        <i class="fa fa-spinner fa-pulse fa-4x fa-fw"></i>
+    </div>
+</div>
+<div class="content">
+    {% block content %}{% endblock %}
+</div>
+<div class="footer">
+    {% if app_version %}v {{ app_version }}{% endif %}
+</div>

@@ -1,0 +1,65 @@
+{% load custom_tags %}
+<table class="container-table">
+    {% if containers %}
+        <tr>
+            <th class="container-name">Name</th>
+            <th class="container-id">Id</th>
+            <th class="container-status">Status</th>
+            <th class="container-started">Started</th>
+            <th class="container-image">Image</th>
+            <th class="container-sync">Synced</th>
+            {% if not disable_container_actions or disable_container_actions == 'False' %}
+                <th class="container-actions">Actions</th>
+            {% endif %}
+        </tr>
+    {% endif %}
+    {% for container in containers %}
+        <tr class="container-{{ container.status }}">
+            <td class="container-name">{{ container.name }}</td>
+            <td class="container-id">{{ container.short_id }}</td>
+            <td class="container-status">{{ container.status }}</td>
+            <td class="container-started">{{ container.started_at }}</td>
+            <td class="container-image">{{ container.tags_display|linebreaksbr }}</td>
+            <td class="container-sync">
+                {% if service_hash and service_hash != container.service_hash %}
+                    No{% elif service_hash and service_hash == container.service_hash %}Yes{% else %}N/A{% endif %}
+            </td>
+            {% if not disable_container_actions or disable_container_actions == 'False' %}
+                <td class="container-actions">
+                    <form class="auto-margin">
+                        {% if container.can_be_stopped and perms|get:service_name|get:'container_stop' %}
+                            <button class="btn-icon" formaction="{% url 'container_stop' container.id %}"
+                                    onclick="loading()">
+                                <i class="far fa-stop-circle fa-red" title="Stop Container"></i>
+                            </button>
+                        {% endif %}
+                        {% if container.can_be_restarted and perms|get:service_name|get:'container_restart' %}
+                            <button class="btn-icon" formaction="{% url 'container_restart' container.id %}"
+                                    onclick="loading()">
+                                <i class="fas fa-sync fa-blue" title="Restart Container"></i>
+                            </button>
+                        {% endif %}
+                        {% if container.can_be_started and perms|get:service_name|get:'container_start' %}
+                            <button class="btn-icon" formaction="{% url 'container_start' container.id %}"
+                                    onclick="loading()">
+                                <i class="far fa-play-circle fa-green" title="Start Container"></i>
+                            </button>
+                        {% endif %}
+                        {% if container.can_be_removed and perms|get:service_name|get:'container_remove' %}
+                            <button class="btn-icon" formaction="{% url 'container_remove' container.id %}"
+                                    onclick="loading()">
+                                <i class="far fa-times-circle fa-red" title="Remove Container"></i>
+                            </button>
+                        {% endif %}
+                        {% if not service_hash and perms|get:service_name|get:'container_logs' %}
+                            <button class="btn-icon" formaction="{% url 'container_logs' container.id %}"
+                                    title="logs" onclick="loading()">
+                                <i class="fas fa-clipboard-list"></i>
+                            </button>
+                        {% endif %}
+                    </form>
+                </td>
+            {% endif %}
+        </tr>
+    {% endfor %}
+</table>

@@ -1,0 +1,20 @@
+{% extends 'compose_ui/base.html' %}
+{% block content %}
+    {% if error %}
+        <div class="error-content" style="text-align: left">{{ error }}</div>
+    {% endif %}
+
+    <form action="{% url 'system_edit_compose_file' %}" method="post">
+        {% csrf_token %}
+        <p>
+            <textarea name="file_content" oninput="setHeight(this.id)" id="file_content" style="width: 100%;">{{ doc_file }}</textarea>
+        </p>
+        <p><input type="submit" value="Save"/></p>
+    </form>
+    <script>
+        function setHeight(fieldId) {
+            document.getElementById(fieldId).style.height = document.getElementById(fieldId).scrollHeight + 'px';
+        }
+        setHeight('file_content');
+    </script>
+{% endblock %}

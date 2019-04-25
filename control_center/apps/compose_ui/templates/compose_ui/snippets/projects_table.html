@@ -1,0 +1,146 @@
+{% load custom_tags %}
+{% if project_list %}
+    {% for project in project_list %}
+        <div class="project-container">
+            <div class="project-header">
+                <div class="project-title">{{ project.project_name|upper }}</div>
+                {% if project.config %}
+                    <div class="project-buttons">
+                        <form class="auto-margin">
+                            {% if project.can_be_upped and perms|get:project.project_name|get:'up' %}
+                                <button class="btn-icon" formaction="{% url 'project_up' project.project_name %}"
+                                        title="Start all Services, Networks, Volumes for {{ project.project_name }}"
+                                        onclick="loading()">
+                                    <i class="far fa-arrow-alt-circle-up fa-blue"></i>
+                                    Up
+                                </button>
+                            {% endif %}
+                            {% if project.can_be_downed and perms|get:project.project_name|get:'down' %}
+                                <button class="btn-icon" formaction="{% url 'project_down' project.project_name %}"
+                                        title="Stop and Remove all Services, Networks, Volumes for {{ project.project_name|capfirst }}"
+                                        onclick="loading()">
+                                    <i class="far fa-arrow-alt-circle-down fa-blue"></i>
+                                    Down
+                                </button>
+                            {% endif %}
+                            {% if project.can_be_restarted and perms|get:project.project_name|get:'restart' %}
+                                <button class="btn-icon" formaction="{% url 'project_restart' project.project_name %}"
+                                        title="Restart all Stopped and Running Services" onclick="loading()">
+                                    <i class="fas fa-sync fa-blue"></i>
+                                    Restart
+                                </button>
+                            {% endif %}
+                            {% if project.can_be_removed and perms|get:project.project_name|get:'remove' %}
+                                <button class="btn-icon" formaction="{% url 'project_remove' project.project_name %}"
+                                        title="Remove Stopped Containers for {{ project.project_name|capfirst }}"
+                                        onclick="loading()">
+                                    <i class="far fa-times-circle fa-red"></i>
+                                    Remove
+                                </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+            <br/>
+            {% for service in project.services %}
+                {% if perms|get:service.service_name|get:'view' %}
+                    <div class="service-container">
+                        <div class="service-header">
+                            <div class="service-title">
+                                {% if project.config and not service.config %}
+                                    (orphan)
+                                {% endif %}
+                                <b>{{ service.service_name }}</b>
+                                {% if service.config_image_display %}
+                                    [{{ service.config_image_display }}]
+                                {% endif %}
+                            </div>
+                            {% if service.config %}
+                                <div class="service-buttons">
+                                    <form class="auto-margin">
+                                        {% if service.can_be_upped and perms|get:service.service_name|get:'up' %}
+                                            <button class="btn-icon button"
+                                                    formaction="{% url 'service_up' service.project_name service.service_name %}"
+                                                    title="Service Up" onclick="loading()">
+                                                <i class="far fa-arrow-alt-circle-up fa-blue"></i>
+                                                Up
+                                            </button>
+                                        {% endif %}
+                                        {% if service.can_be_stopped and perms|get:service.service_name|get:'stop' %}
+                                            <button class="btn-icon"
+                                                    formaction="{% url 'service_stop' service.project_name service.service_name %}"
+                                                    title="Stop Running Containers for {{ service.service_name }}"
+                                                    onclick="loading()">
+                                                <i class="far fa-stop-circle fa-red"></i>
+                                                Stop
+                                            </button>
+                                        {% endif %}
+                                        {% if service.can_be_started and perms|get:service.service_name|get:'start' %}
+                                            <button class="btn-icon"
+                                                    formaction="{% url 'service_start' service.project_name service.service_name %}"
+                                                    title="Start Stopped Containers for {{ service.service_name }}"
+                                                    onclick="loading()">
+                                                <i class="far fa-play-circle fa-green"></i>
+                                                Start
+                                            </button>
+                                        {% endif %}
+                                        {% if service.can_be_restarted and perms|get:service.service_name|get:'restart' %}
+                                            <button class="btn-icon"
+                                                    formaction="{% url 'service_restart' service.project_name service.service_name %}"
+                                                    title="Restart Stopped and Running Containers for {{ service.service_name }}"
+                                                    onclick="loading()">
+                                                <i class="fas fa-sync fa-blue"></i>
+                                                Restart
+                                            </button>
+                                        {% endif %}
+                                        {% if service.can_be_removed and perms|get:service.service_name|get:'remove' %}
+                                            <button class="btn-icon"
+                                                    formaction="{% url 'service_remove' service.project_name service.service_name %}"
+                                                    title="Remove Stopped Containers for {{ service.service_name }}"
+                                                    onclick="loading()">
+                                                <i class="far fa-times-circle fa-red"></i>
+                                                Remove
+                                            </button>
+                                        {% endif %}
+                                        {% if service.can_be_updated and perms|get:service.service_name|get:'update' %}
+                                            <button class="btn-icon"
+                                                    formaction="{% url 'service_update' service.project_name service.service_name %}"
+                                                    title="Update {{ service.service_name }}" onclick="loading()">
+                                                <i class="fas fa-redo fa-blue"></i>
+                                                Update
+                                            </button>
+                                        {% endif %}
+                                        {% if service.can_be_rolled_back and perms|get:service.service_name|get:'rollback' %}
+                                            <button class="btn-icon"
+                                                    formaction="{% url 'service_rollback' service.project_name service.service_name %}"
+                                                    title="Rollback {{ service.service_name }}" onclick="loading()">
+                                                <i class="fas fa-undo fa-red"></i>
+                                                Rollback
+                                            </button>
+                                        {% endif %}
+                                        {% if perms|get:service.service_name|get:'logs' %}
+                                            <button class="btn-icon" style="float: right"
+                                                    formaction="{% url 'service_logs' service.project_name service.service_name %}"
+                                                    title="Show logs for {{ service.service_name }}" onclick="loading()">
+                                                <i class="fas fa-clipboard-list"></i>
+                                                Logs
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if service.config %}
+                            {% include 'compose_ui/snippets/containers_table.html' with containers=service.containers disable_container_actions=disable_container_actions service_hash=service.config.hash service_name=service.config.service_name perms=perms only %}
+                        {% else %}
+                            {% include 'compose_ui/snippets/containers_table.html' with containers=service.containers disable_container_actions=disable_container_actions service_name='other_projects' perms=perms only %}
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+{% elif container_list %}
+    {% include 'compose_ui/snippets/containers_table.html' with containers=container_list service_name='other_containers' perms=perms only %}
+{% endif %}

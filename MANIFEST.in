@@ -1,0 +1,5 @@
+include LICENSE.md
+include README.md
+exclude .gitlab-ci.yml
+exclude .gitignore
+exclude Dockerfile

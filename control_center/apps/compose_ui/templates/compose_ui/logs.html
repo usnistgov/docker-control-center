@@ -1,0 +1,13 @@
+{% extends 'compose_ui/base.html' %}
+{% block content %}
+    <form class="auto-margin logs-form">
+        <label for="lines" class="logs-label">Lines:</label>
+        <input class="logs-input" id=lines name="lines" type="text" value="{{ lines }}"/>
+        <button class="btn-icon button logs-button" formaction="{{ request.get_full_path }}"
+                title="Refresh logs" onclick="loading()">
+            reload
+        </button>
+    </form>
+    <br/><br/>
+    <div class="logs-content">{{ logs|linebreaksbr }}</div>
+{% endblock %}

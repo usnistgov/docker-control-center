@@ -1,0 +1,26 @@
+{% extends 'compose_ui/base.html' %}
+{% block content %}
+    <form class="auto-margin">
+        {% if compose_file %}
+            <button class="btn-icon" style="margin-bottom: 5px" formaction="{% url 'view_compose_file' %}" onclick="loading()">
+                <i class="far fa-edit" title="Edit Compose File"></i>
+                Edit docker-compose File
+            </button>
+            <br/>
+        {% endif %}
+        <button class="btn-icon" formaction="{% url 'system_clean_old_images' %}" onclick="loading()">
+            <i class="far fa-trash-alt" title="Clean Old Images"></i>
+            Delete old unused images
+        </button>
+        <br/>
+        <button class="btn-icon" style="margin-top: 5px" formaction="{% url 'system_prune' %}" onclick="loading()">
+            <i class="far fa-trash-alt" title="Prune"></i>
+            Prune
+        </button>
+        <br/>
+        <button class="btn-icon" style="margin-top: 5px" formaction="{% url 'system_prune_all' %}" onclick="loading()">
+            <i class="far fa-trash-alt" title="Prune All"></i>
+            Prune All
+        </button>
+    </form>
+{% endblock %}

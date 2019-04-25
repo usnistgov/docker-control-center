@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    {# Snippet to prevent clickjacking. Taken from https://www.codemagi.com/blog/post/194 #}
+    <style id="antiClickjack">body {
+        display: none !important;
+    }</style>
+    <!--suppress JSValidateTypes -->
+    <script type="text/javascript">
+        if (self === top) {
+            var antiClickjack = document.getElementById("antiClickjack");
+            antiClickjack.parentNode.removeChild(antiClickjack);
+        } else
+            top.location = self.location;
+    </script>
+
+    <link rel="stylesheet" type="text/css" href="{% static "authentication/style.css" %}"/>
+
+    <title>{{ title }} Login</title>
+</head>
+<body>
+<div>
+    <div style="text-align:center; margin-bottom:30px"><h1>Welcome to {{ title }}</h1></div>
+
+    <form method="post" class="login-form" autocomplete="off" id="login_form">
+        {% csrf_token %}
+
+        <div>
+            <input type="text" id="username" name="username" class="form-control" placeholder="User name"
+                   spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" autofocus>
+        </div>
+
+        <div>
+            <input type="password" id="password" name="password" class="form-control" placeholder="Password"
+                   autocomplete="off">
+        </div>
+
+        <div>
+            <input type="submit" class="btn btn-success form-control" value="Log in">
+        </div>
+    </form>
+
+    <div class="alert alert-danger" style="display:none" id="cookie_error">
+        This application relies on cookies to work properly. Please modify your web browser settings
+        to allow this site to use cookies. Reload this page after modifying the settings
+        and you will be able to log in.
+    </div>
+
+    {% if user_name_or_password_incorrect %}
+        <div class="alert alert-danger">
+            <span class="glyphicon icon-info"></span> The user name or password was not valid.
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    if (!navigator.cookieEnabled) {
+        document.getElementById("login_form").style.display = "none";
+        document.getElementById("cookie_error").style.display = "block";
+    }
+</script>
+
+</body>
+</html>

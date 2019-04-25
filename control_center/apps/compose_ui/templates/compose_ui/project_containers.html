@@ -1,0 +1,11 @@
+{% extends 'compose_ui/base.html' %}
+{% block content %}
+<div>
+    {% if project_list %}
+        {% include 'compose_ui/snippets/projects_table.html' with project_list=project_list disable_container_actions=disable_container_actions perms=perms only %}
+    {% endif %}
+    {% if not project_list %}
+        <p>No docker-compose projects available.</p>
+    {% endif %}
+</div>
+{% endblock %}
