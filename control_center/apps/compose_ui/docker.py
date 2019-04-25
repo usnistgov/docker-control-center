@@ -42,23 +42,22 @@ def compose_config() -> ComposeProjectConfig:
         if last_modified > _cache.get("last_modified", 0):
             yml_config = validate_and_resolve_config()
             _cache["last_modified"] = last_modified
-            with open(settings.YML_PATH, "r") as stream:
-                try:
-                    logger.debug(f"loading yml file at {settings.YML_PATH}")
-                    yml_file = yaml.load(yml_config)
-                    if yml_file:
-                        _cache["config"] = ComposeProjectConfig(
-                            compose_file_path=settings.YML_PATH, config=yml_file, project_name=settings.COMPOSE_PROJECT
-                        )
-                        create_permissions_for_config(_cache["config"])
-                        Permission.objects.all()
-                        logger.debug("success")
-                except IOError as io_err:
-                    logger.exception("error opening file", io_err)
-                    raise SystemExit(f"error loading file {settings.YML_PATH}")
-                except yaml.YAMLError as exc:
-                    logger.exception("error loading file", exc)
-                    raise SystemExit("error loading file")
+            try:
+                logger.debug(f"loading yml file at {settings.YML_PATH}")
+                yml_file = yaml.load(yml_config, Loader=yaml.FullLoader)
+                if yml_file:
+                    _cache["config"] = ComposeProjectConfig(
+                        compose_file_path=settings.YML_PATH, config=yml_file, project_name=settings.COMPOSE_PROJECT
+                    )
+                    create_permissions_for_config(_cache["config"])
+                    Permission.objects.all()
+                    logger.debug("success")
+            except IOError as io_err:
+                logger.exception("error opening file", io_err)
+                raise SystemExit(f"error loading file {settings.YML_PATH}")
+            except yaml.YAMLError as exc:
+                logger.exception("error loading file", exc)
+                raise SystemExit("error loading file")
         return _cache["config"]
 
 
