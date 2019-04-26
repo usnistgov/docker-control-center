@@ -165,4 +165,4 @@ DATABASES = {
     "default": {"ENGINE": "django.db.backends.sqlite3", "NAME": os.path.join(BASE_DIR, "config/control_center.sqlite3")}
 }
 
-from control_center.config.settings import *
+from .config.settings import *
