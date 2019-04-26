@@ -3,7 +3,7 @@ FROM centos:centos7
 RUN yum --assumeyes update
 RUN yum --assumeyes install https://centos7.iuscommunity.org/ius-release.rpm
 
-RUN yum --assumeyes install vim python36u python36u-pip git docker-client
+RUN yum --assumeyes install vim python36u python36u-pip docker-client
 
 RUN rm -f /etc/localtime \
 	&& ln -s /usr/share/zoneinfo/America/New_York /etc/localtime

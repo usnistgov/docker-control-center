@@ -44,7 +44,7 @@ def compose_config() -> ComposeProjectConfig:
             _cache["last_modified"] = last_modified
             try:
                 logger.debug(f"loading yml file at {settings.YML_PATH}")
-                yml_file = yaml.load(yml_config, Loader=yaml.FullLoader)
+                yml_file = yaml.load(yml_config, Loader=yaml.Loader)
                 if yml_file:
                     _cache["config"] = ComposeProjectConfig(
                         compose_file_path=settings.YML_PATH, config=yml_file, project_name=settings.COMPOSE_PROJECT

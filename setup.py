@@ -2,6 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="docker_compose_control_center",
+    use_describe_version=True,
     python_requires=">=3.6",
     packages=find_packages(),
     include_package_data=True,
@@ -23,12 +24,10 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3.6",
     ],
-    use_scm_version=True,
-    setup_requires=["setuptools_scm"],
     install_requires=[
         "docker==3.7.0",
         "django==2.1.8",
-        "PyYAML==5.1",
+        "PyYAML==4.2b4",
         "docker-compose==1.24.0",
         "whitenoise==4.1.2",
         "requests==2.20.0",
