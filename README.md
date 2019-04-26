@@ -6,6 +6,11 @@ It has built-in permissions to control who can view and execute different comman
 
 #### Quick Start
 
+Pull the image:
+```
+docker pull nanofab/control_center
+```
+
 If you have a docker-compose file, simply run:
 ```
 docker run --detach --publish 8000:8000 --volume /var/run/docker.sock:/var/run/docker.sock --volume <path to your docker-compose.yml parent folder>:/control-center/compose/:ro --volume <path to your control center configuration folder>/:/control-center/config/ nanofab/control_center
