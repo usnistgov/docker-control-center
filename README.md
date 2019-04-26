@@ -1,6 +1,6 @@
-# Control Center
+# Docker Control Center
 
-Docker Compose Control Center is a lightweight Django web application allowing the user to control **docker-compose projects** as well as regular **standalone docker containers**.
+Docker Control Center is a lightweight Django web application allowing the user to control **docker-compose projects** as well as regular **standalone docker containers**.
 
 It has built-in permissions to control who can view and execute different commands like start/stop/remove on projects or services.
 
@@ -22,9 +22,9 @@ Then run (to create the first admin user):
 docker run --interactive --tty --volume <path to control center configuration folder>/:/control-center/config/ nanofab/control_center django-admin createsuperuser
 ```
 
-access the application at http://localhost:8000/
+access the application at http://localhost:8000/ and log in using the previously created credentials
 
-## Settings
+# Settings
 Docker compose control center can be customized by adding parameters to the `settings.py` file inside your control-center configuration directory.
 
 #### Windows Host
@@ -86,7 +86,13 @@ LOGIN_TITLE = "My Login Page Title"
 #### Database connection
 If you want to change the default sqlite Database, refer to the [documentation on django's website](https://docs.djangoproject.com/en/2.1/ref/databases/).
 
-### Authentication
+## Authentication
+
+#### Username & password
+The default authentication is done using username/password but its use is discouraged in production environments
+
+
+#### LDAP
 You can authenticate via LDAP by setting the following:
 ```python
 AUTHENTICATION_BACKENDS = ["control_center.libs.authentication.backends.LDAPAuthenticationBackend"]
@@ -98,7 +104,51 @@ LDAP_SERVERS = [{
     }]
 ```
 
-Another option is to configure [Nginx](https://hub.docker.com/r/nanofab/nginx) to authenticate and then set the following:
+#### HTTP header
+This is not recommended for production environment unless behind a proxy like Nginx which would set the specific header
+
 ```python
+# The key part here is "control_center.libs.authentication.middleware.HTTPHeaderAuthenticationMiddleware"
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "control_center.libs.authentication.middleware.HTTPHeaderAuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
+AUTHENTICATION_BACKENDS = ["control_center.libs.authentication.backends.RemoteUserAuthenticationBackend"]
+
+# optional, defaults to Authorization
+# AUTHENTICATION_HEADER = "remote_user"
+```
+
+
+#### Kerberos
+Another option is to use [Nginx with kerberos module](https://hub.docker.com/r/nanofab/nginx) to authenticate and then set the following:
+```python
+# The key part here is "control_center.libs.authentication.middleware.HTTPHeaderAuthenticationMiddleware"
+MIDDLEWARE = [
+    "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "control_center.libs.authentication.middleware.HTTPHeaderAuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+]
+
 AUTHENTICATION_BACKENDS = ['control_center.libs.authentication.backends.NginxKerberosAuthorizationHeaderAuthenticationBackend']
 ```
+
+### Advanced Configuration
+
+You can find all the application settings and their default values here: [Default Settings](https://github.com/usnistgov/docker-control-center/blob/master/control_center/base_settings.py)
+
+Any of those can be overridden in your settings.py file
