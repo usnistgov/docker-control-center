@@ -17,6 +17,8 @@ urlpatterns = [
     ),
     # Admin pages
     path("admin/", admin_site.urls),
+    # API pages
+    path("api/", include("control_center.apps.api.urls")),
     # Docker Compose UI pages
     path("docker/", include("control_center.apps.compose_ui.urls")),
     # Authentication pages:

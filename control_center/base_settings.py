@@ -38,10 +38,23 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.admin",
+    "rest_framework",
+    "rest_framework.authtoken",
     "control_center.libs.authentication",
+    "control_center.libs.decorators",
     "control_center.libs.custom_tags",
+    "control_center.apps.delegate",
+    "control_center.apps.api",
     "control_center.apps.compose_ui",
 ]
+
+REST_FRAMEWORK = {
+    # "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    )
+}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

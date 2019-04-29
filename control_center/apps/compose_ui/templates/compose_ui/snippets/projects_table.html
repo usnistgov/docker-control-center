@@ -133,14 +133,14 @@
                         </div>
                         {% if service.config %}
                             {% include 'compose_ui/snippets/containers_table.html' with containers=service.containers disable_container_actions=disable_container_actions service_hash=service.config.hash service_name=service.config.service_name perms=perms only %}
-                        {% else %}
-                            {% include 'compose_ui/snippets/containers_table.html' with containers=service.containers disable_container_actions=disable_container_actions service_name='other_projects' perms=perms only %}
                         {% endif %}
                     </div>
                 {% endif %}
             {% endfor %}
         </div>
     {% endfor %}
+{% elif container_list and other_projects %}
+    {% include 'compose_ui/snippets/containers_table.html' with containers=container_list service_name='other_projects' perms=perms only %}
 {% elif container_list %}
     {% include 'compose_ui/snippets/containers_table.html' with containers=container_list service_name='other_containers' perms=perms only %}
 {% endif %}

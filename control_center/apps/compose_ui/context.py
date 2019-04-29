@@ -20,5 +20,7 @@ base_context = {
 }
 
 
-def context(items: Dict = {}) -> Dict:
+def context(items=None) -> Dict:
+    if items is None:
+        items = {}
     return {**base_context, **items}

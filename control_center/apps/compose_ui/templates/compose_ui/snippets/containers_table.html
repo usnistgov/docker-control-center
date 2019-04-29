@@ -2,12 +2,18 @@
 <table class="container-table">
     {% if containers %}
         <tr>
+            {% if service_name == 'other_projects' %}
+                <th class="container-project">Project</th>
+                <th class="container-service">Service</th>
+            {% endif %}
             <th class="container-name">Name</th>
             <th class="container-id">Id</th>
             <th class="container-status">Status</th>
             <th class="container-started">Started</th>
             <th class="container-image">Image</th>
-            <th class="container-sync">Synced</th>
+            {% if service_name != 'other_projects' and service_name != 'other_containers' %}
+                <th class="container-sync">Synced</th>
+            {% endif %}
             {% if not disable_container_actions or disable_container_actions == 'False' %}
                 <th class="container-actions">Actions</th>
             {% endif %}
@@ -15,15 +21,21 @@
     {% endif %}
     {% for container in containers %}
         <tr class="container-{{ container.status }}">
+            {% if service_name == 'other_projects' %}
+                <td class="container-project">{{ container.project }}</td>
+                <td class="container-service">{{ container.service }}</td>
+            {% endif %}
             <td class="container-name">{{ container.name }}</td>
             <td class="container-id">{{ container.short_id }}</td>
             <td class="container-status">{{ container.status }}</td>
             <td class="container-started">{{ container.started_at }}</td>
             <td class="container-image">{{ container.tags_display|linebreaksbr }}</td>
-            <td class="container-sync">
-                {% if service_hash and service_hash != container.service_hash %}
-                    No{% elif service_hash and service_hash == container.service_hash %}Yes{% else %}N/A{% endif %}
-            </td>
+            {% if service_name != 'other_projects' and service_name != 'other_containers' %}
+                <td class="container-sync">
+                    {% if service_hash and service_hash != container.service_hash %}
+                        No{% elif service_hash and service_hash == container.service_hash %}Yes{% else %}N/A{% endif %}
+                </td>
+            {% endif %}
             {% if not disable_container_actions or disable_container_actions == 'False' %}
                 <td class="container-actions">
                     <form class="auto-margin">

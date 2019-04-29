@@ -7,11 +7,19 @@ from typing import List, Dict
 import docker
 import yaml
 from django.conf import settings
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import PermissionDenied, ValidationError
 from docker import DockerClient
+from docker.errors import NotFound
 
-from control_center.apps.compose_ui.objects import ComposeService, ComposeProjectConfig, Container, ComposeProject
+from control_center.apps.delegate.objects import (
+    ComposeService,
+    ComposeProjectConfig,
+    Container,
+    ComposeProject,
+    ComposeServiceConfig,
+)
 
 logger = getLogger("control_center")
 
@@ -46,15 +54,11 @@ def compose_config() -> ComposeProjectConfig:
                 logger.debug(f"loading yml file at {settings.YML_PATH}")
                 yml_file = yaml.load(yml_config, Loader=yaml.Loader)
                 if yml_file:
-                    _cache["config"] = ComposeProjectConfig(
+                    project_config = ComposeProjectConfig(
                         compose_file_path=settings.YML_PATH, config=yml_file, project_name=settings.COMPOSE_PROJECT
                     )
+                    _cache["config"] = project_config
                     create_permissions_for_config(_cache["config"])
-                    Permission.objects.all()
-                    logger.debug("success")
-            except IOError as io_err:
-                logger.exception("error opening file", io_err)
-                raise SystemExit(f"error loading file {settings.YML_PATH}")
             except yaml.YAMLError as exc:
                 logger.exception("error loading file", exc)
                 raise SystemExit("error loading file")
@@ -112,14 +116,14 @@ def create_permissions_for_config(config: ComposeProjectConfig):
         Permission.objects.create(content_type=system_content_type, name=name, codename=codename)
 
 
-def validate_and_resolve_config(raise_error=True) -> [str, str]:
+def validate_and_resolve_config(raise_error=False) -> [str, str]:
     try:
         return execute_compose_command(settings.COMPOSE_PROJECT, ["config"], debug=False)
     except CalledProcessError as error:
-        if raise_error:
+        if not raise_error:
             raise SystemExit(error.output.decode())
         else:
-            return error.output.decode()
+            raise error
 
 
 def service_hashes(project_name: str) -> Dict:
@@ -141,64 +145,58 @@ def pull_image(project_name, service_name):
 def containers_for_project(project_name: str = None, exclude_project_name: str = None) -> List[Container]:
     container_list = []
     docker_container_list = client().containers.list(all=True, filters={"label": "com.docker.compose.project"})
-    for container in docker_container_list:
-        container_dto = Container(container=container)
-        if project_name and container_dto.project == project_name:
-            container_list.append(container_dto)
-        if exclude_project_name and container_dto.project != exclude_project_name:
-            container_list.append(container_dto)
+    for docker_container in docker_container_list:
+        container = Container(container=docker_container)
+        if project_name and container.project == project_name:
+            container_list.append(container)
+        if exclude_project_name and container.project != exclude_project_name:
+            container_list.append(container)
     return container_list
 
 
 def standalone_containers() -> List[Container]:
     container_list = []
     docker_container_list = client().containers.list(all=True)
-    for container in docker_container_list:
-        container_dto = Container(container=container)
-        if not container_dto.project and not container_dto.service:
-            container_list.append(container_dto)
+    for docker_container in docker_container_list:
+        container = Container(container=docker_container)
+        if not container.project and not container.service:
+            container_list.append(container)
     return container_list
 
 
 def containers_for_service(project_name, service_name) -> List[Container]:
-    container_dto_list = []
-    for container in client().containers.list(
+    container_list = []
+    for docker_container in client().containers.list(
         all=True,
         filters={"label": [f"com.docker.compose.service={service_name}", f"com.docker.compose.project={project_name}"]},
     ):
-        container_dto = Container(container=container)
-        container_dto_list.append(container_dto)
-    return container_dto_list
+        container = Container(container=docker_container)
+        container_list.append(container)
+    return container_list
 
 
 def container_by_id(container_id) -> Container:
     return Container(client().containers.get(container_id=container_id))
 
 
-def project_list(container_list: List[Container], config: ComposeProjectConfig = None):
-    projects: List[ComposeProject] = []
-    if config:
-        project = ComposeProject(project_name=config.project_name, project_config=config)
-        for service_conf in config.service_configs:
-            project.services.append(
-                ComposeService(
-                    project_name=project.project_name,
-                    service_name=service_conf.service_name,
-                    service_config=service_conf,
-                )
-            )
-        projects.append(project)
+def compose_service(project_name: str, service_name: str) -> ComposeService:
+    try:
+        service_config: ComposeServiceConfig = compose_config().get_service_config(
+            project_name=project_name, service_name=service_name
+        )
+        return ComposeService(project_name=project_name, service_name=service_name, service_config=service_config)
+    except StopIteration:
+        message = f"couldn't find service '{service_name}' in project '{project_name}'"
+        raise NotFound(message="Not Found", explanation=message)
 
-    for container in container_list:
-        if container.project and container.service:
-            if not list(filter(lambda prj: prj.project_name == container.project, projects)):
-                projects.append(ComposeProject(project_name=container.project))
-            project = next(filter(lambda prj: prj.project_name == container.project, projects))
-            if not list(filter(lambda ser: ser.service_name == container.service, project.services)):
-                project.services.append(
-                    ComposeService(service_name=container.service, project_name=container.project, service_config=None)
-                )
-    return projects
+
+def compose_project_by_name(project_name: str) -> ComposeProject:
+    project_config: ComposeProjectConfig = compose_config()
+    if project_config.project_name == project_name:
+        return ComposeProject(project_name=project_name, project_config=project_config)
+    else:
+        message = f"couldn't find project '{project_name}'"
+        raise NotFound(message="Not Found", explanation=message)
 
 
 def execute_compose_command(project_name: str, args: List[str], debug: bool = True) -> str:
@@ -220,3 +218,143 @@ def execute_compose_command(project_name: str, args: List[str], debug: bool = Tr
         error_output = error.output.decode()
         logger.exception(f"error running docker-compose command: {error_output}")
         raise error
+
+
+# Checks whether a user has permission to perform the action on a container; if not, raise PermissionDenied
+def check_container_permission(user: User, container: Container, perm: str):
+    config = compose_config()
+    app_label = None
+    if container.project and container.project == config.project_name:
+        app_label = container.service
+    elif container.project and container.project != config.project_name:
+        app_label = "other_projects"
+    elif not container.project:
+        app_label = "other_containers"
+    if not user.has_perm(app_label + "." + perm):
+        raise PermissionDenied
+
+
+def update_compose_file_content(file_content: str):
+    config = compose_config()
+    original_file_content = open(config.compose_file_path, "r").read()
+    file_content = file_content.replace("\r\n", "\n")
+    try:
+        open(config.compose_file_path, "w").write(file_content)
+        validate_and_resolve_config(raise_error=True)
+    except CalledProcessError as error:
+        open(config.compose_file_path, "w").write(original_file_content)
+        raise ValidationError(message=error.output.decode())
+    except Exception as err:
+        open(config.compose_file_path, "w").write(original_file_content)
+        raise err
+
+
+def project_up(project_name: str):
+    project = compose_project_by_name(project_name=project_name)
+    project.up()
+
+
+def project_down(project_name: str):
+    project = compose_project_by_name(project_name=project_name)
+    project.down()
+
+
+def project_remove(project_name: str):
+    project = compose_project_by_name(project_name=project_name)
+    project.rm()
+
+
+def project_restart(project_name: str):
+    project = compose_project_by_name(project_name=project_name)
+    project.restart()
+
+
+def service_up(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.up()
+
+
+def service_stop(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.stop()
+
+
+def service_start(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.start()
+
+
+def service_remove(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.rm()
+
+
+def service_restart(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.restart()
+
+
+def service_scale(project_name: str, service_name: str, scale: int):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.scale(scale)
+
+
+def service_update(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.update()
+
+
+def service_rollback(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    service.rollback()
+
+
+def service_logs(project_name: str, service_name: str, lines: int = 100, array=False) -> str:
+    service = compose_service(project_name=project_name, service_name=service_name)
+    return service.logs(lines=lines, array=array)
+
+
+def container_stop(user: User, container_id: str):
+    container = container_by_id(container_id)
+    check_container_permission(user=user, container=container, perm="container_remove")
+    container.stop()
+    return container
+
+
+def container_start(user: User, container_id: str):
+    container = container_by_id(container_id)
+    check_container_permission(user=user, container=container, perm="container_remove")
+    container.start()
+    return container
+
+
+def container_restart(user: User, container_id: str):
+    container = container_by_id(container_id)
+    check_container_permission(user=user, container=container, perm="container_remove")
+    container.restart()
+    return container
+
+
+def container_remove(user: User, container_id: str):
+    container = container_by_id(container_id)
+    check_container_permission(user=user, container=container, perm="container_remove")
+    container.rm()
+    return container
+
+
+def clean_old_images():
+    images = client().images.list(all=True, filters={"dangling": True})
+    for image in images:
+        client().images.remove(image.id, force=True)
+
+
+def prune():
+    clean_old_images()
+    client().containers.prune()
+    client().networks.prune()
+
+
+def prune_all():
+    prune()
+    client().images.prune()
+    client().volumes.prune()

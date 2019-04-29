@@ -34,5 +34,6 @@ setup(
         "ldap3==2.5.1",
         "pytz==2018.9",
         "python-dateutil==2.7.3",
+        "djangorestframework==3.9.2"
     ],
 )
