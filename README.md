@@ -11,6 +11,10 @@ Pull the image:
 docker pull nanofab/control_center
 ```
 
+Create a configuration folder where static files, settings, db and logs will be created.<br>
+For example `/opt/control_center_config`, or `C:\control_center_config` and use the path in the commands below.
+
+
 If you have a docker-compose file, simply run:
 ```
 docker run --detach --publish 8000:8000 --volume /var/run/docker.sock:/var/run/docker.sock --volume <path to your docker-compose.yml parent folder>:/control-center/compose/:ro --volume <path to your control center configuration folder>/:/control-center/config/ nanofab/control_center
@@ -74,7 +78,7 @@ From docker-compose documentation:
 ```
 
 #### Auto Refresh
-Pages can be set to auto refresh (if you are showing container statuses on an always-on display).
+Pages can be set to auto refresh (if you are showing container statuses on an always-on display).<br>
 Simply add the number of seconds between refresh:
 ```python
 AUTO_REFRESH = "30"
@@ -89,7 +93,7 @@ LOGIN_TITLE = "My Login Page Title"
 ```
 
 #### Database connection
-If you want to change the default sqlite Database, refer to the [documentation on django's website](https://docs.djangoproject.com/en/2.1/ref/databases/).
+If you want to change the default SQLite Database, refer to the [documentation on django's website](https://docs.djangoproject.com/en/2.1/ref/databases/).
 
 ## Authentication
 
