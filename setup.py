@@ -26,7 +26,7 @@ setup(
     ],
     install_requires=[
         "docker==3.7.0",
-        "django==2.1.8",
+        "django==2.1.9",
         "PyYAML==4.2b4",
         "docker-compose==1.24.0",
         "whitenoise==4.1.2",
@@ -34,6 +34,6 @@ setup(
         "ldap3==2.5.1",
         "pytz==2018.9",
         "python-dateutil==2.7.3",
-        "djangorestframework==3.9.2"
+        "djangorestframework==3.9.2",
     ],
 )
