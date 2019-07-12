@@ -92,6 +92,19 @@ SITE_TITLE = "My Title"
 LOGIN_TITLE = "My Login Page Title"
 ```
 
+#### Custom Service URL & Logos
+When using a docker-compose file, you can customize each service's logo and URL by providing a `docker-compose.ini` config file next to your docker-compose.yml.<br>
+Here is an example of what it would look like (paths are relative to the config file location):
+
+```ini
+[nginx]
+logo = media/nginx.png
+
+[control-center]
+logo = media/control-center.png
+url = http://www.mysite.com/controlcenter
+```
+
 #### Database connection
 If you want to change the default SQLite Database, refer to the [documentation on django's website](https://docs.djangoproject.com/en/2.1/ref/databases/).
 
