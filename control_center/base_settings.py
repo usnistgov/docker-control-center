@@ -165,6 +165,9 @@ WINDOWS_HOST = False
 # Docker Compose Command to run after service update and rollback (for example reload nginx in nginx service)
 # EXTRA_DOCKER_COMPOSE_COMMAND = ["exec", "--detach", "-T", "nginx", "nginx", "-s", "reload"]
 
+# Extra docker-compose config file (for icons and URLs)
+EXTRA_COMPOSE_CONFIG = os.path.join(Path(YML_PATH).parent, "docker-compose.ini") if YML_PATH else None
+
 # Title for the header and page title
 SITE_TITLE = "Docker Control Center"
 

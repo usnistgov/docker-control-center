@@ -20,6 +20,7 @@ urlpatterns = [
     path("project/<str:project_name>/service/<str:service_name>/update", views.service_update),
     path("project/<str:project_name>/service/<str:service_name>/rollback", views.service_rollback),
     path("project/<str:project_name>/service/<str:service_name>/logs", views.service_logs),
+    path("project/<str:project_name>/service/<str:service_name>/logo", views.service_logo, name="service_logo"),
     # container functions
     path("container/<str:container_id>/stop", views.container_stop),
     path("container/<str:container_id>/start", views.container_start),

@@ -48,10 +48,17 @@
                     <div class="service-container">
                         <div class="service-header">
                             <div class="service-title">
+                                {% if service.config and service.config.logo %}
+                                    <img src="{% url 'service_logo' service.project_name service.service_name %}" class="service-logo"/>
+                                {% endif %}
                                 {% if project.config and not service.config %}
                                     (orphan)
                                 {% endif %}
-                                <b>{{ service.service_name }}</b>
+                                {% if service.config and service.config.url %}
+                                    <a href="{{ service.config.url }}" target="_blank">{{ service.service_name }}</a>
+                                {% else %}
+                                    <b>{{ service.service_name }}</b>
+                                {% endif %}
                                 {% if service.config_image_display %}
                                     [{{ service.config_image_display }}]
                                 {% endif %}

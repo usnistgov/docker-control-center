@@ -81,6 +81,15 @@ table.container-table tr.container-running td {
   padding-left: 5px;
 }
 
+.service-title a:link, a:visited {
+  color: white;
+}
+
+.service-logo {
+  height: 26px;
+  vertical-align: middle;
+}
+
 .project-buttons, .service-buttons, .project-title, .service-title {
   display: inline-block;
   margin: auto 0;

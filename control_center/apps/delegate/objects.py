@@ -1,3 +1,4 @@
+from configparser import ConfigParser
 from datetime import datetime
 from types import SimpleNamespace
 from typing import List, Optional, Union
@@ -13,8 +14,9 @@ from control_center.apps.delegate import docker
 
 
 class ComposeServiceConfig(object):
-    def __init__(self, config: dict, service_name: str, project_name: str, service_hash: str):
+    def __init__(self, config: dict, service_extra_config, service_name: str, project_name: str, service_hash: str):
         self._config: dict = config
+        self._extra_config: dict = service_extra_config
         self.service_name: str = service_name
         self.project_name: str = project_name
         self.hash = service_hash
@@ -27,6 +29,8 @@ class ComposeServiceConfig(object):
         self.environment: dict = config.get("environment")
         self.depends_on: List[str] = config.get("depends_on")
         self.links: List[str] = config.get("links")
+        self.url: str = service_extra_config.get("url")
+        self.logo: str = service_extra_config.get("logo")
 
     @staticmethod
     def get_scale(config: dict) -> int:
@@ -256,8 +260,9 @@ class ComposeService(object):
 
 
 class ComposeProjectConfig(object):
-    def __init__(self, compose_file_path, config: dict, project_name: str):
+    def __init__(self, compose_file_path, config: dict, extra_config: ConfigParser, project_name: str):
         self._config = config
+        self._extra_config = extra_config
         self.compose_file_path: str = compose_file_path
         self.project_name: str = project_name
         self.version: str = config["version"]
@@ -270,6 +275,7 @@ class ComposeProjectConfig(object):
             self.service_configs.append(
                 ComposeServiceConfig(
                     config=self._config["services"][service_name],
+                    service_extra_config=self._extra_config[service_name] if service_name in self._extra_config else {},
                     project_name=self.project_name,
                     service_name=service_name,
                     service_hash=service_hash_dict[self.project_name][service_name],

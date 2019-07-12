@@ -2,6 +2,7 @@ from subprocess import CalledProcessError
 
 from django.contrib.auth.decorators import permission_required
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 from docker.errors import NotFound
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -151,6 +152,14 @@ def service_logs(request, project_name, service_name):
         return Response({"lines": lines, "logs": logs, "project_name": project_name, "service_name": service_name})
     except NotFound as error:
         raise RestNotFound(detail=error.explanation)
+
+
+@api_view(["GET"])
+def service_logo(request, project_name, service_name):
+    logo = docker.service_logo(project_name, service_name)
+    if logo is None:
+        return HttpResponse()
+    return HttpResponse(logo)
 
 
 @api_view(["POST"])

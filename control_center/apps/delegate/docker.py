@@ -1,6 +1,9 @@
+import configparser
 import os
 import subprocess
+from configparser import ConfigParser
 from logging import getLogger
+from pathlib import Path
 from subprocess import CalledProcessError
 from typing import List, Dict
 
@@ -55,7 +58,10 @@ def compose_config() -> ComposeProjectConfig:
                 yml_file = yaml.load(yml_config, Loader=yaml.Loader)
                 if yml_file:
                     project_config = ComposeProjectConfig(
-                        compose_file_path=settings.YML_PATH, config=yml_file, project_name=settings.COMPOSE_PROJECT
+                        compose_file_path=settings.YML_PATH,
+                        config=yml_file,
+                        extra_config=get_extra_config_file(settings.EXTRA_COMPOSE_CONFIG),
+                        project_name=settings.COMPOSE_PROJECT,
                     )
                     _cache["config"] = project_config
                     create_permissions_for_config(_cache["config"])
@@ -63,6 +69,12 @@ def compose_config() -> ComposeProjectConfig:
                 logger.exception("error loading file", exc)
                 raise SystemExit("error loading file")
         return _cache["config"]
+
+
+def get_extra_config_file(extra_path: str) -> ConfigParser:
+    config = configparser.ConfigParser()
+    config.read(extra_path)
+    return config
 
 
 def create_permissions_for_config(config: ComposeProjectConfig):
@@ -312,6 +324,20 @@ def service_rollback(project_name: str, service_name: str):
 def service_logs(project_name: str, service_name: str, lines: int = 100, array=False) -> str:
     service = compose_service(project_name=project_name, service_name=service_name)
     return service.logs(lines=lines, array=array)
+
+
+def service_logo(project_name: str, service_name: str):
+    service = compose_service(project_name=project_name, service_name=service_name)
+    if service.config.logo:
+        return get_logo_file(os.path.join(Path(settings.EXTRA_COMPOSE_CONFIG).parent, service.config.logo))
+
+
+def get_logo_file(path):
+    logo = None
+    if path and os.path.exists(path):
+        with open(path, "rb") as f:
+            logo = f.read()
+    return logo
 
 
 def container_stop(user: User, container_id: str):
