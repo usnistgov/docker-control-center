@@ -237,9 +237,9 @@ class ComposeService(object):
                 if container not in rollback_containers:
                     container.stop()
                     container.rm()
-                elif container in rollback_containers:
-                    container.rename(container.name.replace(self.ROLLBACK_SUFFIX, ""))
-                    container.start()
+            for container in rollback_containers:
+                container.rename(container.name.replace(self.ROLLBACK_SUFFIX, ""))
+                container.start()
             run_extra_command(self.project_name)
 
     def logs(self, lines=100, array=False) -> Union[List[str], str]:
