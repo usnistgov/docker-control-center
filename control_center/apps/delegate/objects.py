@@ -236,6 +236,9 @@ class ComposeService(object):
             for container in self.containers:
                 if container not in rollback_containers:
                     container.stop()
+            self.refresh_containers()
+            for container in self.containers:
+                if container not in rollback_containers:
                     container.rm()
             for container in rollback_containers:
                 container.rename(container.name.replace(self.ROLLBACK_SUFFIX, ""))
