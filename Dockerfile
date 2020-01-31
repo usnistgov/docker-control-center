@@ -1,17 +1,19 @@
-FROM centos:centos7
+FROM centos:centos8
 
-RUN yum --assumeyes update
-RUN yum --assumeyes install https://centos7.iuscommunity.org/ius-release.rpm
+RUN yum --assumeye install dnf-plugins-core
+RUN dnf --assumeyes update
+RUN dnf --assumeyes install epel-release
 
-RUN yum --assumeyes install vim python36u python36u-pip docker-client
+RUN dnf --assumeye config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
+RUN dnf --assumeyes install vim python3-pip docker-ce --nobest
 
 RUN rm -f /etc/localtime \
 	&& ln -s /usr/share/zoneinfo/America/New_York /etc/localtime
 
-RUN pip3.6 install --upgrade pip
+RUN pip3 install --upgrade pip
 
 COPY . /control-center/
-RUN pip3.6 install --no-cache-dir /control-center/ gunicorn==19.9.0
+RUN pip3 install --no-cache-dir /control-center/ gunicorn==19.9.0
 RUN rm --recursive --force /control-center/
 
 RUN mkdir --parents /control-center/config control-center/compose
