@@ -1,19 +1,17 @@
-FROM centos:centos8
+FROM python:3.6
 
-RUN yum --assumeye install dnf-plugins-core
-RUN dnf --assumeyes update
-RUN dnf --assumeyes install epel-release
-
-RUN dnf --assumeye config-manager --add-repo=https://download.docker.com/linux/centos/docker-ce.repo
-RUN dnf --assumeyes install vim python3-pip docker-ce --nobest
+RUN apt-get update && apt-get upgrade -y
+RUN dpkg --purge remove docker docker-engine docker.io containerd runc
+RUN curl -fsSL https://get.docker.com -o get-docker.sh
+RUN sh get-docker.sh
 
 RUN rm -f /etc/localtime \
 	&& ln -s /usr/share/zoneinfo/America/New_York /etc/localtime
 
-RUN pip3 install --upgrade pip
+RUN pip install --upgrade pip
 
 COPY . /control-center/
-RUN pip3 install --no-cache-dir /control-center/ gunicorn==19.9.0
+RUN pip install --no-cache-dir /control-center/ gunicorn==19.9.0
 RUN rm --recursive --force /control-center/
 
 RUN mkdir --parents /control-center/config control-center/compose

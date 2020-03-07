@@ -1,8 +1,6 @@
-recursive-include control_center/apps/compose_ui/static *
-recursive-include control_center/apps/compose_ui/templates *
-recursive-include control_center/libs/authentication/static *
-recursive-include control_center/libs/authentication/templates *
+recursive-include control_center/apps/**/static *
+recursive-include control_center/apps/**/templates *
+recursive-include control_center/libs/**/static *
+recursive-include control_center/libs/**/templates *
 include LICENSE.md
 include README.md
-exclude .gitignore
-exclude Dockerfile
