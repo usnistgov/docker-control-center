@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python :: 3.6",
     ],
     install_requires=[
-        "docker==4.1.1",
+        "docker==4.1.0",
         "django==2.2.13",
         "PyYAML==4.2b4",
         "docker-compose==1.25.3",
