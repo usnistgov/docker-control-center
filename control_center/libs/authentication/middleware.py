@@ -17,9 +17,9 @@ class SessionTimeout:
     @staticmethod
     def process_view(request, view_function, view_ordered_arguments, view_named_arguments):
         """
-		This custom middleware exists to provide a smooth experience for public facing NEMO users.
-		It processes all requests and redirects a user to the login page when their session times out.
-		"""
+        This custom middleware exists to provide a smooth experience for public facing NEMO users.
+        It processes all requests and redirects a user to the login page when their session times out.
+        """
 
         # If the user does not yet have a session then take no action.
         if not request.session:

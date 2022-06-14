@@ -1,13 +1,13 @@
-from _ssl import PROTOCOL_TLSv1_2, CERT_REQUIRED
+from _ssl import CERT_REQUIRED, PROTOCOL_TLSv1_2
 from base64 import b64decode
 from logging import exception, getLogger
 
 from django.conf import settings
-from django.contrib.auth.backends import RemoteUserBackend, ModelBackend
+from django.contrib.auth.backends import ModelBackend
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
-from ldap3 import Tls, Server, Connection, AUTO_BIND_TLS_BEFORE_BIND, SIMPLE
+from ldap3 import AUTO_BIND_TLS_BEFORE_BIND, Connection, SIMPLE, Server, Tls
 from ldap3.core.exceptions import LDAPBindError, LDAPExceptionError
 
 logger = getLogger(__name__)
@@ -15,20 +15,20 @@ logger = getLogger(__name__)
 system_name = settings.LOGIN_TITLE if settings.LOGIN_TITLE else "System"
 
 
-class RemoteUserAuthenticationBackend(RemoteUserBackend):
+class RemoteUserAuthenticationBackend(ModelBackend):
     """ The web server performs Kerberos authentication and passes the user name in via the REMOTE_USER environment variable. """
 
     create_unknown_user = False
 
     def clean_username(self, username):
         """
-		User names arrive in the form user@DOMAIN.NAME.
-		This function chops off Kerberos realm information (i.e. the '@' and everything after).
-		"""
+        Usernames arrive in the form user@DOMAIN.NAME.
+        This function chops off Kerberos realm information (i.e. the '@' and everything after).
+        """
         return username.partition("@")[0]
 
 
-class NginxKerberosAuthorizationHeaderAuthenticationBackend(ModelBackend):
+class NginxKerberosAuthorizationHeaderAuthenticationBackend(RemoteUserAuthenticationBackend):
     """ The web server performs Kerberos authentication and passes the user name in via the HTTP_AUTHORIZATION header. """
 
     def authenticate(self, request, username=None, password=None, **keyword_arguments):
@@ -60,9 +60,9 @@ class NginxKerberosAuthorizationHeaderAuthenticationBackend(ModelBackend):
 
     def clean_username(self, username):
         """
-		User names arrive encoded in base 64, similar to Basic authentication, but with a bogus password set (since .
-		This function chops off Kerberos realm information (i.e. the '@' and everything after).
-		"""
+        Usernames arrive encoded in base 64, similar to Basic authentication, but with a bogus password set (since .
+        This function chops off Kerberos realm information (i.e. the '@' and everything after).
+        """
         if not username:
             return None
         pieces = username.split()
@@ -70,7 +70,8 @@ class NginxKerberosAuthorizationHeaderAuthenticationBackend(ModelBackend):
             return None
         if pieces[0] != "Basic":
             return None
-        return b64decode(pieces[1]).decode().partition(":")[0]
+        credentials = b64decode(pieces[1]).decode().split(":")
+        return credentials if credentials is None else super().clean_username(credentials[0])
 
 
 class LDAPAuthenticationBackend(ModelBackend):
