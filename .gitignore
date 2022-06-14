@@ -55,3 +55,4 @@ venv
 control_center/config
 control_center/compose
 
+.DS_Store
