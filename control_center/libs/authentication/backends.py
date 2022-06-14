@@ -3,7 +3,7 @@ from base64 import b64decode
 from logging import exception, getLogger
 
 from django.conf import settings
-from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth.backends import ModelBackend, RemoteUserBackend
 from django.contrib.auth.models import User
 from django.utils.decorators import method_decorator
 from django.views.decorators.debug import sensitive_post_parameters
@@ -15,7 +15,7 @@ logger = getLogger(__name__)
 system_name = settings.LOGIN_TITLE if settings.LOGIN_TITLE else "System"
 
 
-class RemoteUserAuthenticationBackend(ModelBackend):
+class RemoteUserAuthenticationBackend(RemoteUserBackend):
     """ The web server performs Kerberos authentication and passes the user name in via the REMOTE_USER environment variable. """
 
     create_unknown_user = False
