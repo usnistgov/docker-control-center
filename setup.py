@@ -26,7 +26,7 @@ setup(
     ],
     install_requires=[
         "docker==4.4.4",
-        "django==3.2.13",
+        "django==3.2.14",
         "PyYAML==5.4.1",
         "docker-compose==1.28.5",
         "whitenoise==5.2.0",
