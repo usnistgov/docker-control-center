@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name="docker_compose_control_center",
     use_describe_version=True,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     packages=find_packages(),
     include_package_data=True,
     url="https://github.com/usnistgov/docker-control-center",
@@ -22,7 +22,7 @@ setup(
         "License :: Public Domain",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
     ],
     install_requires=[
         "docker==6.0.0",
