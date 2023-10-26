@@ -1,8 +1,10 @@
 from setuptools import setup, find_packages
 
+VERSION = "4.3.1"
+
 setup(
     name="docker_compose_control_center",
-    use_describe_version=True,
+    version=VERSION,
     python_requires=">=3.8",
     packages=find_packages(),
     include_package_data=True,
