@@ -216,7 +216,7 @@ def execute_compose_command(project_name: str, args: List[str], debug: bool = Tr
         arguments = []
         if settings.WINDOWS_HOST:
             arguments = ["env", "COMPOSE_FORCE_WINDOWS_HOST=1", "env", "COMPOSE_CONVERT_WINDOWS_PATHS=1"]
-        arguments = arguments + ["docker-compose", "--log-level", "ERROR"]
+        arguments = arguments + ["docker", "compose"]
         if settings.COMPATIBILITY_MODE:
             arguments = arguments + ["--compatibility"]
         arguments = arguments + ["--file", settings.YML_PATH, "--project-name", project_name] + args
@@ -228,7 +228,7 @@ def execute_compose_command(project_name: str, args: List[str], debug: bool = Tr
         return output
     except CalledProcessError as error:
         error_output = error.output.decode()
-        logger.exception(f"error running docker-compose command: {error_output}")
+        logger.exception(f"error running docker compose command: {error_output}")
         raise error
 
 

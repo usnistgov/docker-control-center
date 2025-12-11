@@ -265,7 +265,6 @@ class ComposeProjectConfig(object):
         self._extra_config = extra_config
         self.compose_file_path: str = compose_file_path
         self.project_name: str = project_name
-        self.version: str = config["version"]
         self.service_configs: List[ComposeServiceConfig] = []
         self.create_service_configs()
 
