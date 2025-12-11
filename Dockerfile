@@ -11,7 +11,7 @@ RUN rm -f /etc/localtime \
 RUN pip install --upgrade pip
 
 COPY . /control-center/
-RUN pip install --no-cache-dir /control-center/ gunicorn==19.9.0
+RUN pip install --no-cache-dir /control-center/ gunicorn==23.0.0
 RUN rm --recursive --force /control-center/
 
 RUN mkdir --parents /control-center/config control-center/compose
