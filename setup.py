@@ -1,11 +1,11 @@
 from setuptools import setup, find_packages
 
-VERSION = "4.3.1"
+VERSION = "5.0.0"
 
 setup(
     name="docker_compose_control_center",
     version=VERSION,
-    python_requires=">=3.8",
+    python_requires=">=3.14",
     packages=find_packages(),
     include_package_data=True,
     url="https://github.com/usnistgov/docker-control-center",
@@ -24,18 +24,18 @@ setup(
         "License :: Public Domain",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.14",
     ],
     install_requires=[
-        "docker==6.0.0",
-        "django==3.2.15",
-        "PyYAML==5.4.1",
-        "docker-compose==1.29.2",
-        "whitenoise==6.2.0",
-        "requests==2.28.1",
+        "docker==7.1.0",
+        "django==6.0",
+        "PyYAML==6.0.3",
+        # "docker-compose==1.29.2",
+        "whitenoise==6.11.0",
+        "requests==2.32.5",
         "ldap3==2.9.1",
-        "pytz==2022.2.1",
+        "pytz==2025.2",
         "python-dateutil==2.8.2",
-        "djangorestframework==3.13.1",
+        "djangorestframework==3.16.1",
     ],
 )

@@ -1,13 +1,13 @@
-from typing import Dict
+from typing import Dict, Optional
 
 from django.conf import settings
-from pkg_resources import get_distribution, DistributionNotFound
+from importlib.metadata import version, PackageNotFoundError
 
 
-def app_version() -> str:
+def app_version() -> Optional[str]:
     try:
-        return get_distribution("docker_compose_control_center").version
-    except DistributionNotFound:
+        return version("docker_compose_control_center")
+    except PackageNotFoundError:
         # package is not installed
         pass
 
